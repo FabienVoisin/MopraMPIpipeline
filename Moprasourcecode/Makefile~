@@ -1,0 +1,91 @@
+
+MOPRASOURCECODE	=/home/a1204390/Moprasourcecode
+FASTDIRMOPRA	=~/fastdir/Mopra/script
+MOPRAQUICKCMZ	= $(MOPRASOURCECODE)/Mopra_quicklook/CMZ
+MOPRAQUICKCO	= $(MOPRASOURCECODE)/Mopra_quicklook/COsurvey
+MOPRAQUICK7mm	= $(MOPRASOURCECODE)/Mopra_quicklook/7mm
+MOPRAQUICKOBJ	= $(MOPRASOURCECODE)/Mopra_quicklook/obj
+MOPRAFULLCMZ	= $(MOPRASOURCECODE)/Mopra_fullreduction/CMZ
+MOPRAFULLCO	= $(MOPRASOURCECODE)/Mopra_fullreduction/COsurvey
+MOPRAFULL7mm	= $(MOPRASOURCECODE)/Mopra_fullreduction/7mm
+MOPRAFULLOBJ	= $(MOPRASOURCECODE)/Mopra_fullreduction/obj
+MISCFOLDER	= $(MOPRASOURCECODE)/Misc/
+WCSFOLDER	=/home/a1204390/wcs
+CURLFOLDER	=/home/a1204390/curl-7.60.0/lib/
+FITSIO		=/home/a1204390/cfitsio
+
+CC	= mpicc 
+CCFLAGS	= -O2 -Wall -g 
+LDFLAGS	= -L$(WCSFOLDER)  -L$(CURLFOLDER)
+INCFOLDER	= -I$(WCSFOLDER) -I$(FITSIO)/include/  -I$(MISCFOLDER)
+LIBCFITSIO	= libcfitsio.a
+DYNLIB		= -lm -lwcstools -lcurl	
+
+ALL	: gridzillaparallelCMZ livedataparallelCMZ gridzillaparallelCO livedataparallelCO gridzillaparallel7mm livedataparallel7mm gridzillaquickCMZ livedataquickCMZ gridzillaquickCO livedataquickCO gridzillaquick7mm livedataquick7mm writeaveragespectrum
+
+gridzillaparallelCMZ	: gridzillaparallel_CMZ.o grabradec.o
+	$(CC) $(CCFLAGS) $(MOPRAFULLOBJ)/gridzillaparallel_CMZ.o $(MOPRAFULLOBJ)/grabradec.o $(FITSIO)/lib/$(LIBCFITSIO) -o $(FASTDIRMOPRA)/gridzillaparallel_CMZ $(INCFOLDER) $(LDFLAGS) $(DYNLIB)
+
+livedataparallelCMZ	: 
+	$(CC) $(CCFLAGS) $(MOPRAFULLCMZ)/livedataparallel_CMZ.c -o $(FASTDIRMOPRA)/livedataparallel_CMZ -lm
+
+gridzillaparallelCO	: gridzillaparallel_CO.o grabradec.o
+	$(CC) $(CCFLAGS) $(MOPRAFULLOBJ)/gridzillaparallel_CO.o $(MOPRAFULLOBJ)/grabradec.o $(FITSIO)/lib/$(LIBCFITSIO) -o $(FASTDIRMOPRA)/gridzillaparallelCO $(INCFOLDER) $(LDFLAGS) $(DYNLIB)
+
+livedataparallelCO	: 
+	$(CC) $(CCFLAGS) $(MOPRAFULLCO)/livedataparallel_CO.c -o $(FASTDIRMOPRA)/livedataparallelCO -lm
+
+gridzillaparallel7mm	: 
+	$(CC) $(CCFLAGS) $(MOPRAFULL7mm)/gridzillaparallel.c -o $(FASTDIRMOPRA)/gridzillaparallel7mm -lm
+
+livedataparallel7mm	: 
+	$(CC) $(CCFLAGS) $(MOPRAFULL7mm)/livedataparallel.c -o $(FASTDIRMOPRA)/livedataparallel7mm -lm
+
+
+gridzillaquickCMZ	: gridzillaquick_CMZ.o grabradec.o Obtainaveragedspectra.o
+	$(CC) $(CCFLAGS) $(MOPRAQUICKOBJ)/gridzillaquick_CMZ.o $(MOPRAQUICKOBJ)/grabradec.o $(MOPRAQUICKOBJ)/Obtainaveragedspectra.o $(FITSIO)/lib/$(LIBCFITSIO) -o $(FASTDIRMOPRA)/gridzillaquickCMZ $(INCFOLDER) $(LDFLAGS) $(DYNLIB) 
+
+livedataquickCMZ	:
+	$(CC) $(CCFLAGS) $(MOPRAQUICKCMZ)/livedataquick_CMZ.c -o $(FASTDIRMOPRA)/livedataquickCMZ -lm
+
+
+gridzillaquickCO	: gridzillaquick_CO.o grabradec.o Obtainaveragedspectra.o
+	$(CC) $(CCFLAGS) $(MOPRAQUICKOBJ)/gridzillaquick_CO.o $(MOPRAQUICKOBJ)/grabradec.o $(FITSIO)/lib/$(LIBCFITSIO) $(MOPRAQUICKOBJ)/Obtainaveragedspectra.o -o $(FASTDIRMOPRA)/gridzillaquickCO $(INCFOLDER) $(LDFLAGS) $(DYNLIB)
+
+livedataquickCO	:
+	$(CC) $(CCFLAGS) $(MOPRAQUICKCO)/livedataquick_CO.c -o $(FASTDIRMOPRA)/livedataquickCO -lm
+
+
+gridzillaquick7mm	: Obtainaveragedspectra.o grabradec.o
+	$(CC) $(CCFLAGS) $(MOPRAQUICK7mm)/gridzillaquick.c $(MOPRAQUICKOBJ)/Obtainaveragedspectra.o  $(MOPRAQUICKOBJ)/grabradec.o $(FITSIO)/lib/$(LIBCFITSIO) -o $(FASTDIRMOPRA)/gridzillaquick7mm $(INCFOLDER) $(LDFLAGS) $(DYNLIB)
+
+livedataquick7mm	:
+	$(CC) $(CCFLAGS) $(MOPRAQUICK7mm)/livedataquick.c -o $(FASTDIRMOPRA)/livedataquick7mm -lm
+
+writeaveragespectrum	: Obtainaveragedspectra.o writeaveragespectrum.o grabradec.o
+	$(CC) $(CCFLAGS) $(MOPRAQUICKOBJ)/writeaveragespectrum.o $(MOPRAQUICKOBJ)/Obtainaveragedspectra.o $(MOPRAQUICKJOB)/grabradec.o $(FITSIO)/lib/$(LIBCFITSIO) -o $(FASTDIRMOPRA)/writeaveragespectrum $(INCFOLDER) $(LDFLAGS) $(DYNLIB)
+
+gridzillaquick_CO.o	: 
+	$(CC) $(CCFLAGS)  -c $(MOPRAQUICKCO)/gridzillaquick_CO.c -o $(MOPRAQUICKOBJ)/gridzillaquick_CO.o $(INCFOLDER) -lm
+
+gridzillaquick_CMZ.o	: 
+	$(CC) $(CCFLAGS)  -c $(MOPRAQUICKCMZ)/gridzillaquick_CMZ.c -o $(MOPRAQUICKOBJ)/gridzillaquick_CMZ.o $(INCFOLDER) -lm
+
+gridzillaparallel_CMZ.o	: 
+	$(CC) $(CCFLAGS)  -c $(MOPRAFULLCMZ)/gridzillaparallel_CMZ.c -o $(MOPRAFULLOBJ)/gridzillaparallel_CMZ.o $(INCFOLDER) -lm
+
+gridzillaparallel_CO.o	: 
+	$(CC) $(CCFLAGS)  -c $(MOPRAFULLCO)/gridzillaparallel_CO.c -o $(MOPRAFULLOBJ)/gridzillaparallel_CO.o $(INCFOLDER) -lm
+
+writeaveragespectrum.o	:
+	$(CC) $(CCFLAGS) -c $(MISCFOLDER)/writeaveragespectrum.c -o $(MOPRAQUICKOBJ)/writeaveragespectrum.o $(INCFOLDER)
+
+grabradec.o	: 
+	$(CC) $(CCFLAGS)  -c $(MISCFOLDER)/grabradec.c  -o $(MOPRAQUICKOBJ)/grabradec.o $(INCFOLDER) $(LDFLAGS) $(DYNLIB)
+	cp $(MOPRAQUICKOBJ)/grabradec.o $(MOPRAFULLOBJ)/grabradec.o
+
+Obtainaveragedspectra.o	:
+	$(CC) $(CCFLAGS) -c $(MISCFOLDER)/Obtainaveragedspectra.c $(FITSIO)/lib/$(LIBCFITSIO)  -o $(MOPRAQUICKOBJ)/Obtainaveragedspectra.o $(INCFOLDER) -lcurl
+
+clean	:
+	rm -f $(FASTDIRMOPRA)/gridzillaparallel_CMZ $(FASTDIRMOPRA)/livedataparallel_CMZ $(FASTDIRMOPRA)/gridzillaparallelCO $(FASTDIRMOPRA)/livedataparallelCO $(FASTDIRMOPRA)/gridzillaparallel7mm $(FASTDIRMOPRA)/livedataparallel7mm $(FASTDIRMOPRA)/gridzillaquickCMZ $(FASTDIRMOPRA)/livedataquickCMZ $(FASTDIRMOPRA)/gridzillaquickCO $(FASTDIRMOPRA)/livedataquickCO $(FASTDIRMOPRA)/gridzillaquick7mm $(FASTDIRMOPRA)/livedataquick7mm
